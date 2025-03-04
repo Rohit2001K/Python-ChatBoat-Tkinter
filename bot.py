@@ -5,6 +5,9 @@ import pyttsx3
 import json
 from tkinter import END
 from pywhatkit import search
+from tkinter.ttk import *
+import subprocess
+import os
 
 class chatbot:
     def __init__(self, root):
@@ -64,7 +67,7 @@ class chatbot:
         except:
             print("ERROR IN OPENING .TXT FILE")
 
-    #google seach
+    # google search
     def perform_google_search(self, event=None):
         search_query = self.user_input.get()
         if search_query:
@@ -82,6 +85,28 @@ class chatbot:
         self.user_input.delete(0, END)
         self.user_input.unbind("<Return>")  
         self.submit_button.config(command=self.read_user_input)  
+
+    # game selection
+    def game_start(self, game):
+        if game == 'Fighting Badguys':
+            self.open_game_from_path('games/fighting game/game.py')
+            self.option_button.forget()
+            self.option.forget()
+            self.submit_button.grid(row=4, column=2)
+
+        elif game == 'Rock Paper Scissors':
+            print("THE IS ROCK PAPER TEST")
+        elif game == 'Match the Number':
+            print("THE IS MATCH THE NUMBER TEST")
+
+    def open_game_from_path(self, game_path):
+        try:
+            if os.path.exists(game_path):  
+                subprocess.Popen(['python', game_path]) 
+            else:
+                raise FileNotFoundError(f"Game file not found: {game_path}")
+        except Exception as e:
+            tk.messagebox.showerror("Error", f"Could not open the game. Error: {str(e)}")
 
     def read_user_input(self):
         words = self.user_input.get()
@@ -111,6 +136,18 @@ class chatbot:
                             self.user_input.delete(0, END)
                             self.search_for_google() 
                             break
+                        elif check_word[0] == 'game':
+                            bot_reply = "Please select the game!"
+                            self.bot_message.config(text="BOT: " + bot_reply)
+                            self.user_input.delete(0, END)
+                            self.option = Combobox(self.root)
+                            self.option['values'] = ('Fighting Badguys', "Rock Paper Scissors", "Match the Number")
+                            self.option.grid(row=4, column=2)
+                            self.submit_button.forget()
+                            self.option_button = tk.Button(self.root, text="Select Game", command=lambda: self.game_start(self.option.get()), width=30, bg='blue', font=('', 12, 'bold'))
+                            self.option_button.grid(row=6, column=2)
+                            break
+
             if not found_match:
                 print("WAIT")
         else:
